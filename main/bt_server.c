@@ -35,7 +35,7 @@
 #define SPP_SHOW_SPEED 1
 #define SPP_SHOW_MODE SPP_SHOW_SPEED    /*Choose show mode: show data or speed*/
 
-static const char local_device_name[] = "ESP_M1A2";
+static const char local_device_name[] = "ESP_T72`";
 static const esp_spp_mode_t esp_spp_mode = ESP_SPP_MODE_CB;
 static const bool esp_spp_enable_l2cap_ertm = true;
 
