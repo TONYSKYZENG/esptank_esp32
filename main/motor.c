@@ -221,13 +221,14 @@ void paraseMotor(char *str){
     }
     else if (strstr(str, "MOTOR_L")!=NULL)
     {
-       setLeftMotor(6000);
+       setRightMotor(6000);
        //setRightMotor(-6000);
         //playMusicLoop(mp3_data_start_engine,mp3_data_end_engine);
     }
     else if (strstr(str, "MOTOR_R")!=NULL)
     {
-       setLeftMotor(-6000);
+     
+       setLeftMotor(6000);
      // setRightMotor(6000);
      //   playMusicLoop(mp3_data_start_engine,mp3_data_end_engine);
     }
