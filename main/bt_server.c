@@ -24,18 +24,18 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
-#include "sound.h"
 #include "time.h"
 #include "sys/time.h"
 #include "motor.h"
 #include "adc.h"
+#include "tts.h"
 #define SPP_TAG "SPP_ACCEPTOR_DEMO"
 #define SPP_SERVER_NAME "SPP_SERVER"
 #define SPP_SHOW_DATA 0
 #define SPP_SHOW_SPEED 1
 #define SPP_SHOW_MODE SPP_SHOW_SPEED    /*Choose show mode: show data or speed*/
 
-static const char local_device_name[] = "ESP_M1A2";
+static const char local_device_name[] = "ESP_M1A2_TTS";
 static const esp_spp_mode_t esp_spp_mode = ESP_SPP_MODE_CB;
 static const bool esp_spp_enable_l2cap_ertm = true;
 
@@ -44,19 +44,52 @@ static long data_num = 0;
 
 static const esp_spp_sec_t sec_mask = ESP_SPP_SEC_AUTHENTICATE;
 static const esp_spp_role_t role_slave = ESP_SPP_ROLE_SLAVE;
+char tts_buffer[1024];
+char* extractBetweenHashes(const char* input) {
+    if (input == NULL) {
+        return NULL;
+    }
+
+    const char* first_hash = strchr(input, '#');
+    if (first_hash == NULL) {
+        return NULL;
+    }
+
+    const char* second_hash = strchr(first_hash + 1, '#');
+    if (second_hash == NULL) {
+        return NULL;
+    }
+
+    // 计算两个#之间的字符数
+    size_t length = second_hash - first_hash - 1;
+    if (length <= 0) {
+        return NULL;
+    }
+
+    // 分配内存并复制子字符串
+   /* char* result = (char*)malloc(length + 1);
+    if (result == NULL) {
+        return NULL;
+    }*/
+
+    strncpy(tts_buffer, first_hash + 1, length);
+    tts_buffer[length] = '\0';
+
+    return tts_buffer;
+}
 void paraseInput(char *str,esp_spp_cb_param_t *param) {
     if(strstr(str, "ONLIGHT")!=NULL) {
        // gpio_set_level(GPIO_LIGHT,1);
        //startMusic();
     }
     else if(strstr(str, "MUSIC")!=NULL) {
-       playMusicLoop(mp3_data_start_music,mp3_data_end_music);
+     
     }
     else if(strstr(str, "MACHINE_GUN")!=NULL) {
-       playMusicLoop(mp3_data_start_mg,mp3_data_end_mg);
+      
     }
      else if(strstr(str, "CANNON")!=NULL) {
-       playMusicLoop(mp3_data_start_cannon,mp3_data_end_cannon);
+      
     }
     else if (strstr(str, "OFFLIGHT")!=NULL)
     {
@@ -70,13 +103,20 @@ void paraseInput(char *str,esp_spp_cb_param_t *param) {
         sprintf(str,"%d mV",adcVal*11);
         int len = strlen(str);
        esp_spp_write(param->data_ind.handle,len ,(uint8_t*)str);
-        playMusicLoop(mp3_data_start_idel,mp3_data_end_idel);
+        playTTS(str);
     }
     else {
-          paraseMotor(str);
+        char *ru =extractBetweenHashes(str);
+        if(ru){
+             playTTS(ru);
+        }
+        else{
+            paraseMotor(str);
+        }
+          //
     }
   
-  
+
 }
 static char *bda2str(uint8_t * bda, char *str, size_t size)
 {
@@ -89,19 +129,6 @@ static char *bda2str(uint8_t * bda, char *str, size_t size)
             p[0], p[1], p[2], p[3], p[4], p[5]);
     return str;
 }
-
-static void print_speed(void)
-{
-    float time_old_s = time_old.tv_sec + time_old.tv_usec / 1000000.0;
-    float time_new_s = time_new.tv_sec + time_new.tv_usec / 1000000.0;
-    float time_interval = time_new_s - time_old_s;
-    float speed = data_num * 8 / time_interval / 1000.0;
-    ESP_LOGI(SPP_TAG, "speed(%fs ~ %fs): %f kbit/s" , time_old_s, time_new_s, speed);
-    data_num = 0;
-    time_old.tv_sec = time_new.tv_sec;
-    time_old.tv_usec = time_new.tv_usec;
-}
-
 static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 {
     char bda_str[18] = {0};
@@ -112,9 +139,10 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
             ESP_LOGI(SPP_TAG, "ESP_SPP_INIT_EVT");
             esp_spp_start_srv(sec_mask, role_slave, 0, SPP_SERVER_NAME);
             initMotors();
-            initSound();
+            //initSound();
             initAdc();
-            playMusicLoop(mp3_data_start_idel,mp3_data_end_idel);
+            initTTS();
+          //  playMusicLoop(mp3_data_start_idel,mp3_data_end_idel);
         } else {
             ESP_LOGE(SPP_TAG, "ESP_SPP_INIT_EVT status:%d", param->init.status);
         }

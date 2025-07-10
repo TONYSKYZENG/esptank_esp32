@@ -1,9 +1,5 @@
 #include "motor.h"
 #include <string.h>
-#include "ssd1306.h"
-
-
-
 #include "sdkconfig.h"
 #include "driver/gpio.h"
 #include "esp_vfs_semihost.h"
@@ -15,13 +11,12 @@
 #include "esp_event.h"
 #include "esp_log.h"
 #include "lwip/apps/netbiosns.h"
-#include "protocol_examples_common.h"
-#include "ssd1306.h"
+//#include "protocol_examples_common.h"
 #include "esp_netif.h"
 #include "esp_event.h" // Add this line for event loop
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "sound.h"
+//#include "sound.h"
 #define LEDC_TIMER              LEDC_TIMER_0
 #define LEDC_MODE               LEDC_LOW_SPEED_MODE
 #define LEDC_OUTPUT_IO_L0          (23) // Define the output GPIO
@@ -35,60 +30,9 @@
 #define LEDC_DUTY_RES           LEDC_TIMER_13_BIT // Set duty resolution to 13 bits
 #define LEDC_DUTY               (4095) // Set duty to 50%. ((2 ** 13) - 1) * 50% = 4095
 #define LEDC_FREQUENCY          (5000) // Frequency in Hertz. Set frequency at 5 kHz
-SSD1306_t ssd1306Dev;
+
 static const char *TAG = "example";
-void initScreen(void) {
-   SSD1306_t *dev=&ssd1306Dev;
-#if CONFIG_I2C_INTERFACE
-	ESP_LOGI(TAG, "INTERFACE is i2c");
-	ESP_LOGI(TAG, "CONFIG_SDA_GPIO=%d",CONFIG_SDA_GPIO);
-	ESP_LOGI(TAG, "CONFIG_SCL_GPIO=%d",CONFIG_SCL_GPIO);
-	ESP_LOGI(TAG, "CONFIG_RESET_GPIO=%d",CONFIG_RESET_GPIO);
-	i2c_master_init(dev, CONFIG_SDA_GPIO, CONFIG_SCL_GPIO, CONFIG_RESET_GPIO);
-#endif // CONFIG_I2C_INTERFACE
 
-#if CONFIG_SPI_INTERFACE
-	ESP_LOGI(TAG, "INTERFACE is SPI");
-	ESP_LOGI(TAG, "CONFIG_MOSI_GPIO=%d",CONFIG_MOSI_GPIO);
-	ESP_LOGI(TAG, "CONFIG_SCLK_GPIO=%d",CONFIG_SCLK_GPIO);
-	ESP_LOGI(TAG, "CONFIG_CS_GPIO=%d",CONFIG_CS_GPIO);
-	ESP_LOGI(TAG, "CONFIG_DC_GPIO=%d",CONFIG_DC_GPIO);
-	ESP_LOGI(TAG, "CONFIG_RESET_GPIO=%d",CONFIG_RESET_GPIO);
-	spi_master_init(dev, CONFIG_MOSI_GPIO, CONFIG_SCLK_GPIO, CONFIG_CS_GPIO, CONFIG_DC_GPIO, CONFIG_RESET_GPIO);
-#endif // CONFIG_SPI_INTERFACE
-
-#if CONFIG_FLIP
-	dev._flip = true;
-	ESP_LOGW(TAG, "Flip upside down");
-#endif
-
-#if CONFIG_SSD1306_128x64
-	ESP_LOGI(TAG, "Panel is 128x64");
-	ssd1306_init(dev, 128, 64);
-#endif // CONFIG_SSD1306_128x64
-#if CONFIG_SSD1306_128x32
-	ESP_LOGI(TAG, "Panel is 128x32");
-	ssd1306_init(dev, 128, 32);
-#endif // CONFIG_SSD1306_128x32
-
-	ssd1306_clear_screen(dev, false);
-    
-    ssd1306_display_text(dev, 0, "Loading...", 32, false);
-    ssd1306_software_scroll(dev, (dev->_pages - 1), 1);
-}
-void displayIP(SSD1306_t *dev)
-{
-	ssd1306_clear_screen(dev, false);
-    char str[32];
-    esp_netif_ip_info_t ip_info;
-    esp_netif_t *sta_netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-    esp_netif_get_ip_info(sta_netif, &ip_info);
-    // Print the IP address
-    sprintf(str,""IPSTR,IP2STR(&ip_info.ip));
-	ssd1306_contrast(dev, 0xff);
-    ssd1306_display_text(dev, 0, str, 32, false);
-    ssd1306_software_scroll(dev, (dev->_pages - 1), 1);
-}
 void initMotors(void) {
        /**
      * @brief L0
@@ -148,10 +92,6 @@ void initMotors(void) {
         .hpoint         = 0
     };
     ESP_ERROR_CHECK(ledc_channel_config(&ledc_channelR1));
-
-
-
-    displayIP(&ssd1306Dev);
    // playMusicLoop(1);
 }
 void setLeftMotor(int speed) {
@@ -188,7 +128,7 @@ void setRightMotor(int speed) {
     ledc_update_duty(LEDC_MODE, LEDC_CHANNEL_R1);
 }
 void paraseMotor(char *str){
-    //ssd1306_display_text(&ssd1306Dev,2,str,strlen(str),0);
+
     if(strstr(str, "MOTOR_P3")!=NULL) {
         setLeftMotor(7100);
         setRightMotor(7100);
@@ -210,7 +150,7 @@ void paraseMotor(char *str){
     {
        setLeftMotor(0);
        setRightMotor(0);
-       playMusicLoop(mp3_data_start_idel,mp3_data_end_idel);
+    //   playMusicLoop(mp3_data_start_idel,mp3_data_end_idel);
     }
 
     else if (strstr(str, "MOTOR_N1")!=NULL)
