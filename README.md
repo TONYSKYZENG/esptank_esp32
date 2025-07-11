@@ -4,11 +4,12 @@
 This is the code for ESP32 mother board, which supports
 * 2 channel motor
 * 1 Chinese TTS via blue tooth control
+* 1 Music player auto switch with TTS
 
 And requires
 * ESP-IDF 5.0+,
 * ESP-ADF
-* 4M flash in esp32 module (for smaller ones, you need to modify menuconfig)
+* 8M flash in esp32 module (Can not be smaller, tts is a large file)
 ## Overview
 The mother board will firstly set up a Blue tooth SPP server named XXX_M1A2_TTS, afterwards, you can use SPP app like bletooth terminals to control
 Please go to Schematic_ESP32_LITE_V2.pdf for Hardware specs and connections
@@ -55,7 +56,7 @@ Refer to the following table for the firmware flash address.
 |0x1000 | build/bootloader/bootloader.bin|
 |0x8000 | build/partitions.bin|
 |0x10000 | app |
-|0x100000 | components/esp-sr/esp-tts/esp_tts_chinese/esp_tts_voice_data_xiaoxin_small.dat|
+|0x300000 | components/esp-sr/esp-tts/esp_tts_chinese/esp_tts_voice_data_xiaoxin_small.dat|
 
 
 Select compatible audio board in ``menuconfig > Audio HAL``, build the project and flash it to the board, then run monitor tool to view serial output.
@@ -66,7 +67,7 @@ Select compatible audio board in ``menuconfig > Audio HAL``, build the project a
 - Do not worry, flash `components/esp-tts/esp_tts_chinese/esp_tts_voice_data_xiaoxin_small.dat` to the partition table address. For instance, use the following in ESP-IDF terminal:
 
 ```
-esptool.py write_flash 0x100000 esp_tts_voice_data_xiaoxin_small.dat
+esptool.py write_flash 0x300000 esp_tts_voice_data_xiaoxin_small.dat
 ```
 
 

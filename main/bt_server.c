@@ -83,13 +83,13 @@ void paraseInput(char *str,esp_spp_cb_param_t *param) {
        //startMusic();
     }
     else if(strstr(str, "MUSIC")!=NULL) {
-     
+     playMusicLoop(mp3_data_start_music,mp3_data_end_music);
     }
     else if(strstr(str, "MACHINE_GUN")!=NULL) {
-      
+       playMusicLoop(mp3_data_start_mg,mp3_data_end_mg);
     }
      else if(strstr(str, "CANNON")!=NULL) {
-      
+       playMusicLoop(mp3_data_start_cannon,mp3_data_end_cannon);
     }
     else if (strstr(str, "OFFLIGHT")!=NULL)
     {
@@ -103,14 +103,18 @@ void paraseInput(char *str,esp_spp_cb_param_t *param) {
         sprintf(str,"%d mV",adcVal*11);
         int len = strlen(str);
        esp_spp_write(param->data_ind.handle,len ,(uint8_t*)str);
-        playTTS(str);
+       playTTS(str);
     }
     else {
         char *ru =extractBetweenHashes(str);
         if(ru){
+            //switchToTTS();
              playTTS(ru);
         }
         else{
+            if (strstr(str, "MOTOR_S")!=NULL){
+                 playMusicLoop(mp3_data_start_idel,mp3_data_end_idel);
+            }
             paraseMotor(str);
         }
           //

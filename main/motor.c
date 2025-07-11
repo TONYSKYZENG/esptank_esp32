@@ -16,7 +16,6 @@
 #include "esp_event.h" // Add this line for event loop
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-//#include "sound.h"
 #define LEDC_TIMER              LEDC_TIMER_0
 #define LEDC_MODE               LEDC_LOW_SPEED_MODE
 #define LEDC_OUTPUT_IO_L0          (23) // Define the output GPIO
@@ -150,7 +149,6 @@ void paraseMotor(char *str){
     {
        setLeftMotor(0);
        setRightMotor(0);
-    //   playMusicLoop(mp3_data_start_idel,mp3_data_end_idel);
     }
 
     else if (strstr(str, "MOTOR_N1")!=NULL)
