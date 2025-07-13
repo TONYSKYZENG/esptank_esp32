@@ -59,7 +59,7 @@ static const uint8_t spp_adv_data[23] = {
     /* Complete List of 16-bit Service Class UUIDs */
     0x03,0x03,0xF0,0xAB,
     /* Complete Local Name in advertising */
-    0x0F,0x09, 'B', 'L', 'E', '_', 'T', '7', '2', '_', 'S', 'E', 'R','V', 'E', 'R'
+    0x0F,0x09, 'B', 'L', 'E', '_', 'L', 'O', 'C', '_', 'S', 'E', 'R','V', 'E', 'R'
 };
 
 static uint16_t spp_mtu_size = SPP_GATT_MTU_SIZE;
@@ -600,7 +600,38 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
 #endif
                 else if (res == SPP_IDX_SPP_DATA_RECV_VAL) {
                    printf("received %s\r\n",p_data->write.value);
-                   paraseMotor((char*)p_data->write.value);
+                   char *str = (char *)p_data->write.value;
+                   if(strstr(str, "ONLIGHT")!=NULL) {
+                    // gpio_set_level(GPIO_LIGHT,1);
+                    //startMusic();
+                    }
+                    else if(strstr(str, "MUSIC")!=NULL) {
+                    playMusicLoop(mp3_data_start_music,mp3_data_end_music);
+                    }
+                    else if(strstr(str, "MACHINE_GUN")!=NULL) {
+                    playMusicLoop(mp3_data_start_mg,mp3_data_end_mg);
+                    }
+                    else if(strstr(str, "CANNON")!=NULL) {
+                    playMusicLoop(mp3_data_start_cannon,mp3_data_end_cannon);
+                    }
+                    else if (strstr(str, "OFFLIGHT")!=NULL)
+                    {
+                        // gpio_set_level(GPIO_LIGHT,0);
+                        //stopMusic();
+                    }
+                    /*else if(strstr(str, "BAT")!=NULL){
+                        char str[128];
+                        int adcVal = readAdc();
+                        ESP_LOGI(SPP_TAG, "adc = %d",adcVal);
+                        sprintf(str,"%d mV",adcVal*11);
+                        int len = strlen(str);
+                    esp_spp_write(param->data_ind.handle,len ,(uint8_t*)str);
+                        playMusicLoop(mp3_data_start_idel,mp3_data_end_idel);
+                    }*/
+                    else {
+                        paraseMotor(str);
+                    }
+               //    paraseMotor((char*)p_data->write.value);
 #ifdef CONFIG_EXAMPLE_ENABLE_RF_EMC_TEST_MODE
                  //   ESP_LOG_BUFFER_HEX("RX", p_data->write.value, p_data->write.len);
 #else

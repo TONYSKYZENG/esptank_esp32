@@ -17,5 +17,5 @@ direct_dependencies:
 - chmorgan/esp-libhelix-mp3
 - idf
 manifest_hash: c1e52fb88e627445b7e7ca69da801ad10378714845ff54c77595ed91b1c457ea
-target: esp32
+target: esp32c3
 version: 2.0.0

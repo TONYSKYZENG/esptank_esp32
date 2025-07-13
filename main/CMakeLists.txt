@@ -5,6 +5,6 @@ list(APPEND srcs
      "rf_tesing_configuration_cmd.c")
 endif()
 set(COMPONENT_EMBED_TXTFILES idel.mp3 mg.mp3 music.mp3 cannon.mp3)
-idf_component_register(SRCS "${srcs}"
+idf_component_register(SRCS "bt_server.c" "${srcs}"
                     INCLUDE_DIRS "."
                     EMBED_FILES "engine.mp3" "mg.mp3" "idel.mp3" "cannon.mp3" "music.mp3")
