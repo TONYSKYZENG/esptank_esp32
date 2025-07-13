@@ -22,9 +22,9 @@
 #define I2S_NUM         (0)
 //#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
 #define I2S_MCK_IO      (-1)
-#define I2S_BCK_IO      (GPIO_NUM_26)
-#define I2S_WS_IO       (GPIO_NUM_27)
-#define I2S_DO_IO       (GPIO_NUM_25)
+#define I2S_BCK_IO      (GPIO_NUM_5)
+#define I2S_WS_IO       (GPIO_NUM_6)
+#define I2S_DO_IO       (GPIO_NUM_4)
 #define I2S_DI_IO       (-1)
 void initSound(void);
 void stopMusic(void);
