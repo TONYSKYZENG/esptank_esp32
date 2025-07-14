@@ -606,13 +606,13 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
                     //startMusic();
                     }
                     else if(strstr(str, "MUSIC")!=NULL) {
-                    playMusicLoop(mp3_data_start_music,mp3_data_end_music);
+                  //  playMusicLoop(mp3_data_start_music,mp3_data_end_music);
                     }
                     else if(strstr(str, "MACHINE_GUN")!=NULL) {
-                    playMusicLoop(mp3_data_start_mg,mp3_data_end_mg);
+                    //playMusicLoop(mp3_data_start_mg,mp3_data_end_mg);
                     }
                     else if(strstr(str, "CANNON")!=NULL) {
-                    playMusicLoop(mp3_data_start_cannon,mp3_data_end_cannon);
+                  //  playMusicLoop(mp3_data_start_cannon,mp3_data_end_cannon);
                     }
                     else if (strstr(str, "OFFLIGHT")!=NULL)
                     {
