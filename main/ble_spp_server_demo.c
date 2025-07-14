@@ -53,7 +53,7 @@ static const uint16_t spp_service_uuid = 0xABF0;
 
 #define BLUETOOTH_TASK_PINNED_TO_CORE              (0)
 
-static const uint8_t spp_adv_data[23] = {
+static uint8_t spp_adv_data[23] = {
     /* Flags */
     0x02,0x01,0x06,
     /* Complete List of 16-bit Service Class UUIDs */
@@ -332,7 +332,14 @@ static void print_write_buffer(void)
         temp_spp_recv_data_node_p1 = temp_spp_recv_data_node_p1->next_node;
     }
 }
+#include "esp_mac.h"
 
+void get_chip_uuid(uint8_t *mac) {
+  //  uint8_t mac[6]; // MAC address is 6 bytes
+    // 获取WiFi MAC地址（最稳定的方式）
+    esp_read_mac(mac, ESP_MAC_WIFI_STA);
+    
+}
 void uart_task(void *pvParameters)
 {
     uart_event_t event;
@@ -533,12 +540,23 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
         break;
     }
 }
+void mac3_to_str_compact(char* str, uint8_t a, uint8_t b, uint8_t c) {
+    const char hex[] = "0123456789ABCDEF";
+    str[0] = hex[(a >> 4) & 0xF]; str[1] = hex[a & 0xF];
+    str[2] = hex[(b >> 4) & 0xF]; str[3] = hex[b & 0xF];
+    str[4] = hex[(c >> 4) & 0xF]; str[5] = hex[c & 0xF];
+    //str[6] = '\0';
+}
 
 static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
 {
     esp_ble_gatts_cb_param_t *p_data = (esp_ble_gatts_cb_param_t *) param;
     uint8_t res = 0xff;
-
+    char *str=(char*)(&spp_adv_data[23-6]);
+    uint8_t raw_mac[6];
+    esp_read_mac(raw_mac, ESP_MAC_WIFI_STA);
+    mac3_to_str_compact(str,raw_mac[3],raw_mac[4],raw_mac[5]);
+    //snprintf(str,6,"%02X%02X%02X",tmac[3],tmac[4],tmac[5]);
     switch (event) {
     	case ESP_GATTS_REG_EVT:
     	    ESP_LOGI(GATTS_TABLE_TAG, "GATT server register, status %d, app_id %d, gatts_if %d", param->reg.status, param->reg.app_id, gatts_if);
