@@ -40,7 +40,7 @@ config TRAIN_SOUND_MINI_BOARD
 Lastly, go to  ``idf.py menuconfig`` and check ``CONFIG_TANK_SOUND_MINI_BOARD=y``
 ## Overview
 The mother board will firstly set up a BLE SPP server named xxx_LOC, afterwards, you can use SPP app like bletooth terminals to control
-Please go to Schematic_ESP32_LITE_V2.pdf for Hardware specs and connections
+Please go to ESP32C3_CONTROLLER.pdf for Hardware specs and connections
 ## Modification of music
 - 1. Convert to single channel mp3, sample rate 32K
 - 2. Place at main/
