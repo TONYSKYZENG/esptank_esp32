@@ -11,7 +11,7 @@ And requires
 * ESP-ADF
 * 8M flash in esp32 module (Can not be smaller, tts is a large file)
 ## Overview
-The mother board will firstly set up a Blue tooth SPP server named XXX_M1A2_TTS, afterwards, you can use SPP app like bletooth terminals to control
+The mother board will firstly set up a BLE SPP server named BLETANK_XXX, afterwards, you can use SPP app like bletooth terminals to control
 Please go to Schematic_ESP32_LITE_V2.pdf for Hardware specs and connections
 
 This example allows to convert Chinese text into Chinese speech. You can send as #XXX# where XXX is your content.

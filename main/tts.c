@@ -178,9 +178,13 @@ void playMusicLoop(uint8_t *start,uint8_t *end)
         i2s_pipe_idx = 1;
     }
     else{
-        audio_pipeline_stop(pipeline2);
-    audio_pipeline_wait_for_stop(pipeline2);
-    audio_pipeline_terminate(pipeline2);
+      audio_pipeline_pause(pipeline2);
+    i2s_stream_set_clk(i2s_stream_writer, 32000, 16, 1);
+    file_marker.start = start;
+    file_marker.end = end;
+    file_marker.pos = 0;
+    audio_pipeline_resume(pipeline2);
+    return;
     }
     i2s_stream_set_clk(i2s_stream_writer2, 32000, 16, 1);
     file_marker.start = start;

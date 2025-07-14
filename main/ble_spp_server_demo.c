@@ -24,7 +24,9 @@
 #include "esp_gatt_common_api.h"
 #include "esp_timer.h"
 #include "motor.h"
-#include "sound.h"
+#include "tts.h"
+#include "adc.h"
+#include "esp_mac.h"
 #if (CONFIG_EXAMPLE_ENABLE_RF_TESTING_CONFIGURATION_COMMAND)
 #include "rf_tesing_configuration_cmd.h"
 #endif // CONFIG_EXAMPLE_ENABLE_RF_TESTING_CONFIGURATION_COMMAND
@@ -53,13 +55,13 @@ static const uint16_t spp_service_uuid = 0xABF0;
 
 #define BLUETOOTH_TASK_PINNED_TO_CORE              (0)
 
-static const uint8_t spp_adv_data[23] = {
+static uint8_t spp_adv_data[23] = {
     /* Flags */
     0x02,0x01,0x06,
     /* Complete List of 16-bit Service Class UUIDs */
     0x03,0x03,0xF0,0xAB,
     /* Complete Local Name in advertising */
-    0x0F,0x09, 'B', 'L', 'E', '_', 'L', 'O', 'C', '_', 'S', 'E', 'R','V', 'E', 'R'
+    0x0F,0x09, 'B', 'L', 'E', 'T', 'A', 'N', 'K', '_', 'S', 'E', 'R','V', 'E', 'R'
 };
 
 static uint16_t spp_mtu_size = SPP_GATT_MTU_SIZE;
@@ -533,12 +535,105 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
         break;
     }
 }
+char tts_buffer[1024];
+char* extractBetweenHashes(const char* input) {
+    if (input == NULL) {
+        return NULL;
+    }
 
+    const char* first_hash = strchr(input, '#');
+    if (first_hash == NULL) {
+        return NULL;
+    }
+
+    const char* second_hash = strchr(first_hash + 1, '#');
+    if (second_hash == NULL) {
+        return NULL;
+    }
+
+    // 计算两个#之间的字符数
+    size_t length = second_hash - first_hash - 1;
+    if (length <= 0) {
+        return NULL;
+    }
+
+    // 分配内存并复制子字符串
+   /* char* result = (char*)malloc(length + 1);
+    if (result == NULL) {
+        return NULL;
+    }*/
+
+    strncpy(tts_buffer, first_hash + 1, length);
+    tts_buffer[length] = '\0';
+
+    return tts_buffer;
+}
+void paraseInput(char *str) {
+    if(strstr(str, "ONLIGHT")!=NULL) {
+       // gpio_set_level(GPIO_LIGHT,1);
+       //startMusic();
+    }
+    else if(strstr(str, "MUSIC")!=NULL) {
+     playMusicLoop(mp3_data_start_music,mp3_data_end_music);
+    }
+    else if(strstr(str, "MACHINE_GUN")!=NULL) {
+       playMusicLoop(mp3_data_start_mg,mp3_data_end_mg);
+    }
+     else if(strstr(str, "CANNON")!=NULL) {
+       playMusicLoop(mp3_data_start_cannon,mp3_data_end_cannon);
+    }
+    else if (strstr(str, "OFFLIGHT")!=NULL)
+    {
+        // gpio_set_level(GPIO_LIGHT,0);
+        //stopMusic();
+    }
+    else if(strstr(str, "BAT")!=NULL){
+        char str[128];
+        int adcVal = readAdc();
+        ESP_LOGI("ADC", "adc = %d",adcVal);
+        sprintf(str,"%d mV",adcVal*11);
+        int len = strlen(str);
+       //esp_spp_write(param->data_ind.handle,len ,(uint8_t*)str);
+        esp_ble_gatts_send_indicate(spp_gatts_if, 
+                                              spp_conn_id, 
+                                              spp_handle_table[SPP_IDX_SPP_DATA_NTY_VAL],
+                                              len,
+                                            (uint8_t*)str, 
+                                            false);
+       playTTS(str);
+    }
+    else {
+        char *ru =extractBetweenHashes(str);
+        if(ru){
+            //switchToTTS();
+             playTTS(ru);
+        }
+        else{
+            if (strstr(str, "MOTOR_S")!=NULL){
+                 playMusicLoop(mp3_data_start_idel,mp3_data_end_idel);
+            }
+            paraseMotor(str);
+        }
+          //
+    }
+  
+
+}
+void mac3_to_str_compact(char* str, uint8_t a, uint8_t b, uint8_t c) {
+    const char hex[] = "0123456789ABCDEF";
+    str[0] = hex[(a >> 4) & 0xF]; str[1] = hex[a & 0xF];
+    str[2] = hex[(b >> 4) & 0xF]; str[3] = hex[b & 0xF];
+    str[4] = hex[(c >> 4) & 0xF]; str[5] = hex[c & 0xF];
+    //str[6] = '\0';
+}
 static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
 {
     esp_ble_gatts_cb_param_t *p_data = (esp_ble_gatts_cb_param_t *) param;
     uint8_t res = 0xff;
-
+    char *str=(char*)(&spp_adv_data[23-6]);
+    uint8_t raw_mac[6];
+    esp_read_mac(raw_mac, ESP_MAC_WIFI_STA);
+    mac3_to_str_compact(str,raw_mac[3],raw_mac[4],raw_mac[5]);
     switch (event) {
     	case ESP_GATTS_REG_EVT:
     	    ESP_LOGI(GATTS_TABLE_TAG, "GATT server register, status %d, app_id %d, gatts_if %d", param->reg.status, param->reg.app_id, gatts_if);
@@ -546,7 +641,8 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
         	esp_ble_gap_config_adv_data_raw((uint8_t *)spp_adv_data, sizeof(spp_adv_data));
         	esp_ble_gatts_create_attr_tab(spp_gatt_db, gatts_if, SPP_IDX_NB, SPP_SVC_INST_ID);
             initMotors();
-            initSound();
+            initTTS();
+            initAdc();
        	break;
     	case ESP_GATTS_READ_EVT:
             ESP_LOGI(GATTS_TABLE_TAG, "Characteristic read");
@@ -599,33 +695,16 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
                 }
 #endif
                 else if (res == SPP_IDX_SPP_DATA_RECV_VAL) {
-                   printf("received %s\r\n",p_data->write.value);
-                   esp_ble_gatts_send_indicate(spp_gatts_if, 
+                  // printf("received %s\r\n",p_data->write.value);
+                  /* esp_ble_gatts_send_indicate(spp_gatts_if, 
                                               spp_conn_id, 
                                               spp_handle_table[SPP_IDX_SPP_DATA_NTY_VAL],
                                               p_data->write.len,
                                               p_data->write.value, 
-                                              false);
+                                              false);*/
                  //  esp_ble_gatts_send_indicate()
                    char *str = (char *)p_data->write.value;
-                   if(strstr(str, "ONLIGHT")!=NULL) {
-                    // gpio_set_level(GPIO_LIGHT,1);
-                    //startMusic();
-                    }
-                    else if(strstr(str, "MUSIC")!=NULL) {
-                    playMusicLoop(mp3_data_start_music,mp3_data_end_music);
-                    }
-                    else if(strstr(str, "MACHINE_GUN")!=NULL) {
-                    playMusicLoop(mp3_data_start_mg,mp3_data_end_mg);
-                    }
-                    else if(strstr(str, "CANNON")!=NULL) {
-                    playMusicLoop(mp3_data_start_cannon,mp3_data_end_cannon);
-                    }
-                    else if (strstr(str, "OFFLIGHT")!=NULL)
-                    {
-                        // gpio_set_level(GPIO_LIGHT,0);
-                        //stopMusic();
-                    }
+                    paraseInput(str);
                     /*else if(strstr(str, "BAT")!=NULL){
                         char str[128];
                         int adcVal = readAdc();
@@ -635,9 +714,7 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
                     esp_spp_write(param->data_ind.handle,len ,(uint8_t*)str);
                         playMusicLoop(mp3_data_start_idel,mp3_data_end_idel);
                     }*/
-                    else {
-                        paraseMotor(str);
-                    }
+                   
                //    paraseMotor((char*)p_data->write.value);
 #ifdef CONFIG_EXAMPLE_ENABLE_RF_EMC_TEST_MODE
                  //   ESP_LOG_BUFFER_HEX("RX", p_data->write.value, p_data->write.len);
