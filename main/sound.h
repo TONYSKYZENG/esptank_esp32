@@ -28,9 +28,10 @@
 #define I2S_DI_IO       (-1)
 void initSound(void);
 void stopMusic(void);
-void startMusic(void);
+/*void startMusic(void);
 void i2s_music_mp3(void *args);
 void i2s_music_mp3_once (void *args);
+*/
 
 void playMusicSingle(uint8_t *start,uint8_t *end);
 void playMusicLoop(uint8_t *start,uint8_t *end);

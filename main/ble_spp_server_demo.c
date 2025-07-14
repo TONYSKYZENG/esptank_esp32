@@ -606,28 +606,22 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
                     //startMusic();
                     }
                     else if(strstr(str, "MUSIC")!=NULL) {
-                  //  playMusicLoop(mp3_data_start_music,mp3_data_end_music);
+                     playMusicLoop(mp3_data_start_music,mp3_data_end_music);
                     }
                     else if(strstr(str, "MACHINE_GUN")!=NULL) {
                     //playMusicLoop(mp3_data_start_mg,mp3_data_end_mg);
                     }
                     else if(strstr(str, "CANNON")!=NULL) {
-                  //  playMusicLoop(mp3_data_start_cannon,mp3_data_end_cannon);
+                     playMusicLoop(mp3_data_start_cannon,mp3_data_end_cannon);
                     }
                     else if (strstr(str, "OFFLIGHT")!=NULL)
                     {
                         // gpio_set_level(GPIO_LIGHT,0);
                         //stopMusic();
                     }
-                    /*else if(strstr(str, "BAT")!=NULL){
-                        char str[128];
-                        int adcVal = readAdc();
-                        ESP_LOGI(SPP_TAG, "adc = %d",adcVal);
-                        sprintf(str,"%d mV",adcVal*11);
-                        int len = strlen(str);
-                    esp_spp_write(param->data_ind.handle,len ,(uint8_t*)str);
+                    else if(strstr(str, "BAT")!=NULL){
                         playMusicLoop(mp3_data_start_idel,mp3_data_end_idel);
-                    }*/
+                    }
                     else {
                         paraseMotor(str);
                     }
