@@ -135,36 +135,93 @@ void setRightMotor(int speed) {
     ledc_update_duty(LEDC_MODE, LEDC_CHANNEL_R0);
     ledc_update_duty(LEDC_MODE, LEDC_CHANNEL_R1);
 }
+char speed_buffer[1024];
+char* extractBetweenHashes(const char* input) {
+    if (input == NULL) {
+        return NULL;
+    }
+
+    const char* first_hash = strchr(input, '#');
+    if (first_hash == NULL) {
+        return NULL;
+    }
+
+    const char* second_hash = strchr(first_hash + 1, '#');
+    if (second_hash == NULL) {
+        return NULL;
+    }
+
+    // 计算两个#之间的字符数
+    size_t length = second_hash - first_hash - 1;
+    if (length <= 0) {
+        return NULL;
+    }
+
+    // 分配内存并复制子字符串
+   /* char* result = (char*)malloc(length + 1);
+    if (result == NULL) {
+        return NULL;
+    }*/
+
+    strncpy(speed_buffer, first_hash + 1, length);
+    speed_buffer[length] = '\0';
+    return speed_buffer;
+}
+
 void paraseMotor(char *str){
     //ssd1306_display_text(&ssd1306Dev,2,str,strlen(str),0);
-    if(strstr(str, "MOTOR_P3")!=NULL) {
+    if(strstr(str, "<#")!=NULL) {
+        int speed_val = atoi(extractBetweenHashes(str));
+        if(speed_val>=1000||speed_val<0)
+        {
+            speed_val = 0;
+        }
+        int speed_set = 8*speed_val;
+        printf("set speed %d\n",speed_set);
+        setLeftMotor(speed_set);
+       // setRightMotor(speed_set);
+       // playMusicLoop(mp3_data_start_engine,mp3_data_end_engine);
+    }
+     else if(strstr(str, ">#")!=NULL) {
+         int speed_val = atoi(extractBetweenHashes(str));
+        if(speed_val>=1000||speed_val<0)
+        {
+            speed_val = 0;
+        }
+        int speed_set = -8*speed_val;
+        setLeftMotor(speed_set);
+        printf("set speed %d\n",speed_set);
+       // setRightMotor(speed_set);
+       // playMusicLoop(mp3_data_start_engine,mp3_data_end_engine);
+    }
+    else if(strstr(str, "MOTOR_P3")!=NULL) {
         setLeftMotor(7100);
-        setRightMotor(7100);
+       // setRightMotor(7100);
        // playMusicLoop(mp3_data_start_engine,mp3_data_end_engine);
     }
     else if (strstr(str, "MOTOR_P2")!=NULL)
     {
        setLeftMotor(6000);
-       setRightMotor(6000);
+      // setRightMotor(6000);
        // playMusicLoop(mp3_data_start_engine,mp3_data_end_engine);
     }
     else if (strstr(str, "MOTOR_P1")!=NULL)
     {
        setLeftMotor(4096);
-       setRightMotor(4096);
+     //  setRightMotor(4096);
        // playMusicLoop(mp3_data_start_engine,mp3_data_end_engine);
     }
     else if (strstr(str, "MOTOR_S")!=NULL)
     {
        setLeftMotor(0);
-       setRightMotor(0);
+      // setRightMotor(0);
        playMusicLoop(mp3_data_start_idel,mp3_data_end_idel);
     }
 
     else if (strstr(str, "MOTOR_N1")!=NULL)
     {
        setLeftMotor(-6000);
-       setRightMotor(-6000);
+     //  setRightMotor(-6000);
       //  playMusicLoop(mp3_data_start_engine,mp3_data_end_engine);
     }
     else if (strstr(str, "MOTOR_L")!=NULL)
@@ -176,7 +233,7 @@ void paraseMotor(char *str){
     else if (strstr(str, "MOTOR_R")!=NULL)
     {
      
-       setLeftMotor(6000);
+       setRightMotor(0);
      // setRightMotor(6000);
      //   playMusicLoop(mp3_data_start_engine,mp3_data_end_engine);
     }
