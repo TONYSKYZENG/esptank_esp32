@@ -35,7 +35,7 @@
 #define SPP_SHOW_SPEED 1
 #define SPP_SHOW_MODE SPP_SHOW_SPEED    /*Choose show mode: show data or speed*/
 
-static const char local_device_name[] = "ESP_M1A2_TTS";
+static char local_device_name[] = "ESP_M1A1_TTS_SERVER";
 static const esp_spp_mode_t esp_spp_mode = ESP_SPP_MODE_CB;
 static const bool esp_spp_enable_l2cap_ertm = true;
 
@@ -133,10 +133,28 @@ static char *bda2str(uint8_t * bda, char *str, size_t size)
             p[0], p[1], p[2], p[3], p[4], p[5]);
     return str;
 }
+#include "esp_mac.h"
+
+void get_chip_uuid(uint8_t *mac) {
+  //  uint8_t mac[6]; // MAC address is 6 bytes
+    // 获取WiFi MAC地址（最稳定的方式）
+    esp_read_mac(mac, ESP_MAC_WIFI_STA);
+    
+}
+void mac3_to_str_compact(char* str, uint8_t a, uint8_t b, uint8_t c) {
+    const char hex[] = "0123456789ABCDEF";
+    str[0] = hex[(a >> 4) & 0xF]; str[1] = hex[a & 0xF];
+    str[2] = hex[(b >> 4) & 0xF]; str[3] = hex[b & 0xF];
+    str[4] = hex[(c >> 4) & 0xF]; str[5] = hex[c & 0xF];
+    //str[6] = '\0';
+}
 static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 {
     char bda_str[18] = {0};
-
+    char *str=(char*)(&local_device_name[strlen(local_device_name)-6]);
+    uint8_t raw_mac[6];
+    esp_read_mac(raw_mac, ESP_MAC_WIFI_STA);
+    mac3_to_str_compact(str,raw_mac[3],raw_mac[4],raw_mac[5]);
     switch (event) {
     case ESP_SPP_INIT_EVT:
         if (param->init.status == ESP_SPP_SUCCESS) {
