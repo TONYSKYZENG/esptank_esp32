@@ -24,8 +24,8 @@
 #include "sound.h"
 #define LEDC_TIMER              LEDC_TIMER_0
 #define LEDC_MODE               LEDC_LOW_SPEED_MODE
-#define LEDC_OUTPUT_IO_L0          (19) // Define the output GPIO
-#define LEDC_OUTPUT_IO_L1          (18) // Define the output GPIO
+#define LEDC_OUTPUT_IO_L0          (18) // Define the output GPIO
+#define LEDC_OUTPUT_IO_L1          (19) // Define the output GPIO
 #define LEDC_OUTPUT_IO_R0          (7) // Define the output GPIO
 #define LEDC_OUTPUT_IO_R1          (8) // Define the output GPIO
 #define LEDC_CHANNEL_L0            LEDC_CHANNEL_0
