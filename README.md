@@ -16,9 +16,26 @@ Please go to Schematic_ESP32_LITE_V2.pdf for Hardware specs and connections
 
 This example allows to convert Chinese text into Chinese speech. You can send as #XXX# where XXX is your content.
 
-## TTS Specs
+## ESP-ADF Preparation
+### Use Hacked ADF
+I have a hacked version which is 100% compatable
 
-### Patch Required
+```
+git clone  --recursive https://github.com/TONYSKYZENG/ESP-ADF_MOD.git
+cd ESP-ADF_MOD
+./install.sh
+```
+
+#### Other Hints
+To be always compatable, please use the esp-idf inside, run the following before build
+
+```
+source ${Path of ESP-ADF_MOD}/esp-idf/export.sh
+${Path of ESP-ADF_MOD}/export.sh
+export ADF_PATH=${Path of ESP-ADF_MOD}
+```
+
+### (Option Alt, out-dated, May be not such useful) Patch Required on Other ADF Version
 Our board is not officially supported by ESP-ADF, therefore, a patch is required.
 
 First, unzip the tank_sound_mini.zip to 
