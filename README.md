@@ -10,7 +10,25 @@ This is the code for ESP32C3 mother board, which supports
 And requires
 * ESP-IDF 5.0+,
 * 4M flash in esp32 module (for smaller ones, you need to modify menuconfig)
-## Patch Required
+## ADF Required
+### Use Hacked ADF
+I have a hacked version which is 100% compatable
+
+```
+git clone  --recursive https://github.com/TONYSKYZENG/ESP-ADF_MOD.git
+cd ESP-ADF_MOD
+./install.sh
+```
+
+#### Other Hints
+To be always compatable, please use the esp-idf inside, run the following before build
+
+```
+source ${Path of ESP-ADF_MOD}/esp-idf/export.sh
+${Path of ESP-ADF_MOD}/export.sh
+export ADF_PATH=${Path of ESP-ADF_MOD}
+```
+### (Outdated-Reference)
 Our board is not officially supported by ESP-ADF, therefore, a patch is required.
 
 First, unzip the train_sound_mini.zip to 
