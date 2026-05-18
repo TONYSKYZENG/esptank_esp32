@@ -33,6 +33,7 @@ To be always compatable, please use the esp-idf inside, run the following before
 source ${Path of ESP-ADF_MOD}/esp-idf/export.sh
 ${Path of ESP-ADF_MOD}/export.sh
 export ADF_PATH=${Path of ESP-ADF_MOD}
+rm sdkconfig
 ```
 
 ### (Option Alt, out-dated, May be not such useful) Patch Required on Other ADF Version
