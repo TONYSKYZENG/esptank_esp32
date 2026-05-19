@@ -2,10 +2,16 @@
 | ----------------- | ----- | 
 
 
-# ESP32 Train
+# ESP32 White Noise for Sleep
 This is the code for ESP32C3 mother board, which supports
 * 2 channel motor
 * 1 single music player
+## Special Purpose
+This is a white noise player to help sleep
+- Press BAT for rain
+- Press MU for train
+- Press P1 for Plane
+- Type and and #xxx# where xxx is the integer to set loop play minutes
 
 And requires
 * ESP-IDF 5.0+,

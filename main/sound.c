@@ -121,7 +121,7 @@ void initSound(void){
     ESP_LOGI(TAG, "[6.0] Listen for all pipeline events");
 }
 
-
+extern uint32_t g_timer_run_val; 
 void playMusicLoop(uint8_t *start,uint8_t *end)
 {  
    
@@ -134,9 +134,13 @@ void playMusicLoop(uint8_t *start,uint8_t *end)
     file_marker.end = end;
     file_marker.pos = 0;
     audio_pipeline_resume(pipeline);
+    g_timer_run_val=0;
     /*audio_pipeline_reset_ringbuffer(pipeline);
     audio_pipeline_reset_elements(pipeline);
     audio_pipeline_change_state(pipeline, AEL_STATE_INIT);
     audio_pipeline_run(pipeline);*/
 
+}
+void stopMusic(void) {
+    audio_pipeline_pause(pipeline);
 }

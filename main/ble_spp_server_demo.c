@@ -52,14 +52,15 @@ static const uint16_t spp_service_uuid = 0xABF0;
 #endif
 
 #define BLUETOOTH_TASK_PINNED_TO_CORE              (0)
-
+uint32_t g_timer_set_val = 9999;
+uint32_t g_timer_run_val = 0;
 static uint8_t spp_adv_data[23] = {
     /* Flags */
     0x02,0x01,0x06,
     /* Complete List of 16-bit Service Class UUIDs */
     0x03,0x03,0xF0,0xAB,
     /* Complete Local Name in advertising */
-    0x0F,0x09, 'B', 'L', 'E', '_', 'L', 'O', 'C', '_', 'S', 'E', 'R','V', 'E', 'R'
+    0x0F,0x09, 'B', 'L', 'E', '_', 'W', 'N', 'S', '_', 'S', 'E', 'R','V', 'E', 'R'
 };
 
 static uint16_t spp_mtu_size = SPP_GATT_MTU_SIZE;
@@ -547,7 +548,7 @@ void mac3_to_str_compact(char* str, uint8_t a, uint8_t b, uint8_t c) {
     str[4] = hex[(c >> 4) & 0xF]; str[5] = hex[c & 0xF];
     //str[6] = '\0';
 }
-
+extern char* extractBetweenHashes(const char* input) ;
 static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
 {
     esp_ble_gatts_cb_param_t *p_data = (esp_ble_gatts_cb_param_t *) param;
@@ -644,10 +645,32 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
                         //stopMusic();
                     }
                     else if(strstr(str, "BAT")!=NULL){
+                        stopMusic();
                         playMusicLoop(mp3_data_start_idel,mp3_data_end_idel);
                     }
                     else {
-                        paraseMotor(str);
+                        char *ru =extractBetweenHashes(str);
+                        if(ru){
+                            stopMusic();
+                            //switchToTTS();
+                            char str[128];
+                            int time_minutes = atoi(ru);
+                            g_timer_set_val = time_minutes;
+                            sprintf(str,"set to %d minutes",time_minutes);
+                               int len = strlen(str);
+       //esp_spp_write(param->data_ind.handle,len ,(uint8_t*)str);
+        esp_ble_gatts_send_indicate(spp_gatts_if, 
+                                              spp_conn_id, 
+                                              spp_handle_table[SPP_IDX_SPP_DATA_NTY_VAL],
+                                              len,
+                                            (uint8_t*)str, 
+                                            false);
+                        }
+                        else{
+                            
+                            paraseMotor(str);
+                        }
+                        //
                     }
                //    paraseMotor((char*)p_data->write.value);
 #ifdef CONFIG_EXAMPLE_ENABLE_RF_EMC_TEST_MODE
@@ -770,7 +793,18 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
         }
     } while (0);
 }
-
+// 1. 定义定时器回调函数
+static void periodic_timer_callback(void* arg)
+{
+    int64_t time_since_boot = esp_timer_get_time();
+    g_timer_run_val++;
+    printf("%d seconds v.s. %d minutes \r\n",(int)g_timer_run_val,(int)g_timer_set_val);
+    if(g_timer_run_val/60>=g_timer_set_val) {
+        g_timer_run_val = 0;
+        stopMusic();
+    }
+   // printf("time out: %lld ms", time_since_boot);
+}
 void app_main(void)
 {
     esp_err_t ret;
@@ -816,11 +850,36 @@ void app_main(void)
     esp_ble_gatts_register_callback(gatts_event_handler);
     esp_ble_gap_register_callback(gap_event_handler);
     esp_ble_gatts_app_register(ESP_SPP_APP_ID);
-
+    printf("hello world\r\n");
     esp_err_t local_mtu_ret = esp_ble_gatt_set_local_mtu(SPP_GATT_MTU_SIZE);
     if (local_mtu_ret){
         ESP_LOGE(GATTS_TABLE_TAG, "set local  MTU failed, error code = %x", local_mtu_ret);
     }
+    // 2. 配置定时器参数
+    const esp_timer_create_args_t periodic_timer_args = {
+        .callback = &periodic_timer_callback, // 绑定回调函数
+        .name = "periodic_1s_timer",          // 定时器名称（用于调试）
+        /* 
+           skip_unhandled_events = true (可选): 
+           如果定时器由于某些原因产生阻塞，跳过错过的触发，防止多次回调堆积。
+        */
+        .skip_unhandled_events = true,        
+    };
 
+    // 3. 创建定时器句柄
+    esp_timer_handle_t periodic_timer;
+    ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
+
+    // 4. 启动定时器（周期性模式）
+    // 参数单位为微秒 (us)，1秒 = 1,000,000 微秒
+    uint64_t period_us = 1 * 1000 * 1000; 
+    ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, period_us));
+
+    ESP_LOGI(GATTS_TABLE_TAG, "1秒自动重装定时器已启动...");
+
+    while (1) {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        
+    }
     return;
 }
