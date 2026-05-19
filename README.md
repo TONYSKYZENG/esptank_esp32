@@ -27,6 +27,7 @@ To be always compatable, please use the esp-idf inside, run the following before
 source ${Path of ESP-ADF_MOD}/esp-idf/export.sh
 ${Path of ESP-ADF_MOD}/export.sh
 export ADF_PATH=${Path of ESP-ADF_MOD}
+idf.py set-target esp32c3
 ```
 ### (Outdated-Reference)
 Our board is not officially supported by ESP-ADF, therefore, a patch is required.
