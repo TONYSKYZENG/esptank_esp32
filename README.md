@@ -10,8 +10,11 @@ This is the code for ESP32C3 mother board, which supports
 This is a white noise player to help sleep
 - Press BAT for rain
 - Press MU for train
-- Press P1 for Plane
-- Type and and #xxx# where xxx is the integer to set loop play minutes
+- Press P1 for plane
+- Press Cannon for forest stream
+- Press Machine Gun for wave
+- Type and send #xxx# or =xxx=, where xxx is the integer to set loop play minutes
+
 
 And requires
 * ESP-IDF 5.0+,

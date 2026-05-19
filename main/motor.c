@@ -167,7 +167,37 @@ char* extractBetweenHashes(const char* input) {
     speed_buffer[length] = '\0';
     return speed_buffer;
 }
+char* extractBetweenEquals(const char* input) {
+    if (input == NULL) {
+        return NULL;
+    }
 
+    const char* first_hash = strchr(input, '=');
+    if (first_hash == NULL) {
+        return NULL;
+    }
+
+    const char* second_hash = strchr(first_hash + 1, '=');
+    if (second_hash == NULL) {
+        return NULL;
+    }
+
+    // 计算两个#之间的字符数
+    size_t length = second_hash - first_hash - 1;
+    if (length <= 0) {
+        return NULL;
+    }
+
+    // 分配内存并复制子字符串
+   /* char* result = (char*)malloc(length + 1);
+    if (result == NULL) {
+        return NULL;
+    }*/
+
+    strncpy(speed_buffer, first_hash + 1, length);
+    speed_buffer[length] = '\0';
+    return speed_buffer;
+}
 void paraseMotor(char *str){
     //ssd1306_display_text(&ssd1306Dev,2,str,strlen(str),0);
     if(strstr(str, "<#")!=NULL) {

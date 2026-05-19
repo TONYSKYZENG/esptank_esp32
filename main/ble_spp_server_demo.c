@@ -549,6 +549,7 @@ void mac3_to_str_compact(char* str, uint8_t a, uint8_t b, uint8_t c) {
     //str[6] = '\0';
 }
 extern char* extractBetweenHashes(const char* input) ;
+extern char* extractBetweenEquals(const char* input) ;
 static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
 {
     esp_ble_gatts_cb_param_t *p_data = (esp_ble_gatts_cb_param_t *) param;
@@ -634,7 +635,7 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
                      playMusicLoop(mp3_data_start_music,mp3_data_end_music);
                     }
                     else if(strstr(str, "MACHINE_GUN")!=NULL) {
-                    //playMusicLoop(mp3_data_start_mg,mp3_data_end_mg);
+                        playMusicLoop(mp3_data_start_mg,mp3_data_end_mg);
                     }
                     else if(strstr(str, "CANNON")!=NULL) {
                      playMusicLoop(mp3_data_start_cannon,mp3_data_end_cannon);
@@ -650,6 +651,9 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
                     }
                     else {
                         char *ru =extractBetweenHashes(str);
+                        if (ru==NULL) {
+                            ru = extractBetweenEquals(str);
+                        }
                         if(ru){
                             stopMusic();
                             //switchToTTS();
@@ -666,6 +670,7 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
                                             (uint8_t*)str, 
                                             false);
                         }
+                        
                         else{
                             
                             paraseMotor(str);
